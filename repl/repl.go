@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/gabrielbarker/nacho/evaluator"
 	"github.com/gabrielbarker/nacho/lexer"
+	"github.com/gabrielbarker/nacho/object"
 	"github.com/gabrielbarker/nacho/parser"
 )
 
@@ -15,6 +17,7 @@ const PROMPT = "∆∆∆ "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for {
 		fmt.Printf(PROMPT)
@@ -33,8 +36,11 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(program, env)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
